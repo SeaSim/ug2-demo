@@ -1,0 +1,1624 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AQUAVIEW DAH API",
+    "description": "Wrapper API for accessing AquaView MongoDB database",
+    "version": "1.0.11"
+  },
+  "tags": [
+    {
+      "name": "missions",
+      "description": "Metadata stored for each Mission"
+    },
+    {
+      "name": "collectionEvents",
+      "description": "Metadata stored for each CollectionEvent of a Mission"
+    },
+    {
+      "name": "data",
+      "description": "Metadata stored for each Data record of a CollectionEvent"
+    },
+    {
+      "name": "annotations",
+      "description": "Metadata stored for Annotations of a Data record"
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://wfh1llc30j.execute-api.us-east-2.amazonaws.com"
+    }
+  ],
+  "paths": {
+    "/presignedurls": {
+      "post": {
+        "summary": "Create pre-signed url",
+        "description": "Generated a pre-signed url to access a file from S3.  Pre-signed url will expire after 15 minutes",
+        "operationId": "createPreSignedURL",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/URLRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/URLResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/filecompression": {
+      "post": {
+        "summary": "Generate a zip file for a file stored in the cloud",
+        "description": "Creates a zip archive for a file in cloud storage.  First checks to see if a zip file has already been created",
+        "operationId": "compressFile",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FileCompressionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileCompressionResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileCompressionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/missions": {
+      "get": {
+        "tags": [
+          "missions"
+        ],
+        "summary": "Get Missions",
+        "description": "Get all Missions stored in AQUAVIEW",
+        "operationId": "getMissions",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "latMin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          {
+            "name": "latMax",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          {
+            "name": "lonMin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          {
+            "name": "lonMax",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          {
+            "name": "lat",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          {
+            "name": "dist",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": 0,
+              "exclusiveMinimum": true
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Mission"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Invalid Parameters"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/missions/{missionId}": {
+      "get": {
+        "tags": [
+          "missions"
+        ],
+        "summary": "Get one Mission",
+        "description": "Get one Mission based on missionId stored in AQUAVIEW",
+        "operationId": "getOneMission",
+        "parameters": [
+          {
+            "name": "missionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mission"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Invalid Parameters"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/missions/{missionId}/collectionEvents": {
+      "get": {
+        "tags": [
+          "missions"
+        ],
+        "summary": "Get CollectionEvents for a Mission",
+        "description": "Get all CollectionEvents for a Mission stored in AQUAVIEW",
+        "operationId": "getCollectionEventsForMission",
+        "parameters": [
+          {
+            "name": "missionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CollectionEvent"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Invalid Parameters"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/collectionEvents": {
+      "get": {
+        "tags": [
+          "collectionEvents"
+        ],
+        "summary": "Get CollectionEvents",
+        "description": "Get all CollectionEvents stored in AQUAVIEW",
+        "operationId": "getCollectionEvents",
+        "parameters": [
+          {
+            "name": "missionIds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CollectionEvent"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Invalid Parameters"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/collectionEvents/{collectionEventId}": {
+      "get": {
+        "tags": [
+          "collectionEvents"
+        ],
+        "summary": "Get one CollectionEvent",
+        "description": "Get one CollectionEvent based on collectionEventId stored in AQUAVIEW",
+        "operationId": "getOneCollectionEvent",
+        "parameters": [
+          {
+            "name": "collectionEventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CollectionEvent"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Invalid Parameters"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/collectionEvents/{collectionEventId}/data": {
+      "get": {
+        "tags": [
+          "collectionEvents"
+        ],
+        "summary": "Get Data for a CollectionEvent",
+        "description": "Get all Data for a CollectionEvent in AQUAVIEW",
+        "operationId": "getDataForCollectionEvent",
+        "parameters": [
+          {
+            "name": "collectionEventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "latMin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          {
+            "name": "latMax",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          {
+            "name": "lonMin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          {
+            "name": "lonMax",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          {
+            "name": "earliestDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "latestDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Data"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Invalid Parameters"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/data": {
+      "get": {
+        "tags": [
+          "data"
+        ],
+        "summary": "Get Data",
+        "description": "Get all Data stored in AQUAVIEW",
+        "operationId": "getData",
+        "parameters": [
+          {
+            "name": "collectionEventIds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "latMin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          {
+            "name": "latMax",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": -90,
+              "maximum": 90
+            }
+          },
+          {
+            "name": "lonMin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          {
+            "name": "lonMax",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          {
+            "name": "earliestDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "latestDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Data"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Invalid Parameters"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/data/{dataId}": {
+      "get": {
+        "tags": [
+          "data"
+        ],
+        "summary": "Get one Data record",
+        "description": "Get one Data record based on dataId stored in AQUAVIEW",
+        "operationId": "getOneDataRecord",
+        "parameters": [
+          {
+            "name": "dataId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Data"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "422": {
+            "description": "Invalid Parameters"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "URLRequest": {
+        "type": "object",
+        "required": [
+          "bucket",
+          "key"
+        ],
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "storageLocation": {
+            "type": "string",
+            "enum": [
+              "Google Cloud Platform",
+              "Amazon Web Services"
+            ]
+          }
+        }
+      },
+      "URLResponse": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "FileCompressionRequest": {
+        "type": "object",
+        "required": [
+          "bucket",
+          "key",
+          "storageLocation"
+        ],
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "storageLocation": {
+            "type": "string",
+            "enum": [
+              "Google Cloud Platform",
+              "Amazon Web Services"
+            ]
+          }
+        }
+      },
+      "FileCompressionResponse": {
+        "type": "object",
+        "required": [
+          "bucket",
+          "key"
+        ],
+        "properties": {
+          "bucket": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "MetadataTags": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Mission": {
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "abstract",
+          "startDate",
+          "endDate",
+          "name",
+          "purpose",
+          "lat",
+          "lon",
+          "metadata"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MetadataTags"
+          },
+          "schemaVersion": {
+            "type": "number",
+            "format": "float"
+          },
+          "abstract": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string"
+          },
+          "purpose": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number",
+            "format": "float",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "lon": {
+            "type": "number",
+            "format": "float",
+            "minimum": -180,
+            "maximum": 180
+          }
+        }
+      },
+      "CollectionEvent": {
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "missionId",
+          "name",
+          "metadata",
+          "lat",
+          "lon"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MetadataTags"
+          },
+          "schemaVersion": {
+            "type": "number",
+            "format": "float"
+          },
+          "missionId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number",
+            "format": "float",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "lon": {
+            "type": "number",
+            "format": "float",
+            "minimum": -180,
+            "maximum": 180
+          }
+        }
+      },
+      "Data": {
+        "type": "object",
+        "required": [
+          "filepath",
+          "created",
+          "isFair",
+          "fairScore",
+          "dataType",
+          "storageLocation",
+          "schemaVersion",
+          "collectionEventId",
+          "lat",
+          "lon"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "filepath": {
+            "type": "string"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isFair": {
+            "type": "boolean"
+          },
+          "fairScore": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "dataType": {
+            "type": "string"
+          },
+          "storageLocation": {
+            "type": "string"
+          },
+          "schemaVersion": {
+            "type": "number",
+            "format": "float"
+          },
+          "MD_acquisitionInformation": {
+            "type": "object",
+            "properties": {
+              "extent": {
+                "type": "string"
+              },
+              "levelDescription": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_creator": {
+            "type": "object",
+            "properties": {
+              "organization": {
+                "type": "string"
+              },
+              "phoneNumber": {
+                "type": "string"
+              },
+              "roadAddress": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "zipCode": {
+                "type": "string"
+              },
+              "country": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_dataCreator": {
+            "type": "object",
+            "properties": {
+              "organization": {
+                "type": "string"
+              },
+              "phoneNumber": {
+                "type": "string"
+              },
+              "roadAddress": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "zipCode": {
+                "type": "string"
+              },
+              "country": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "website": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_identifier": {
+            "type": "object",
+            "properties": {
+              "UUID": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_instrument": {
+            "type": "object",
+            "properties": {
+              "instrumentType": {
+                "type": "string"
+              },
+              "manufacturer": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "surveyTitle": {
+                "type": "string"
+              },
+              "missionReportLink": {
+                "type": "string"
+              },
+              "eventDescription": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_missionInformation": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "completed",
+                  "historicalArchive",
+                  "obsolete",
+                  "onGoing",
+                  "planned",
+                  "required",
+                  "underDevelopment",
+                  "final",
+                  "pending",
+                  "retired",
+                  "superseded",
+                  "tentative",
+                  "valid",
+                  "accepted",
+                  "notAccepted",
+                  "withdrawn",
+                  "proposed",
+                  "deprecated"
+                ]
+              }
+            }
+          },
+          "MD_objective": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "occurance": {
+                "type": "string"
+              },
+              "triggerCode": {
+                "type": "string",
+                "enum": [
+                  "automatic",
+                  "manual",
+                  "preProgrammed"
+                ]
+              },
+              "contextCode": {
+                "type": "string",
+                "enum": [
+                  "acquisition",
+                  "pass",
+                  "wayPoint"
+                ]
+              },
+              "sequenceCode": {
+                "type": "string",
+                "enum": [
+                  "start",
+                  "end",
+                  "instantaneous"
+                ]
+              },
+              "date": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "MD_platform": {
+            "type": "object",
+            "properties": {
+              "platformType": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "sponsor": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_referenceSystemInfo": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_scope": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "enum": [
+                  "attribute",
+                  "attributeType",
+                  "collectionHardware",
+                  "collectionSession",
+                  "dataset",
+                  "series",
+                  "nonGeographicDataset",
+                  "dimensionGroup",
+                  "feature",
+                  "featureType",
+                  "propertyType",
+                  "fieldSession",
+                  "software",
+                  "service",
+                  "model",
+                  "tile",
+                  "metadata",
+                  "initiative",
+                  "sample",
+                  "document",
+                  "repository",
+                  "aggregate",
+                  "product",
+                  "collection",
+                  "coverage",
+                  "application"
+                ]
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_securityConstraints": {
+            "type": "object",
+            "properties": {
+              "classification": {
+                "type": "string",
+                "enum": [
+                  "unclassified",
+                  "restricted",
+                  "confidential",
+                  "secret",
+                  "topSecret",
+                  "sensitiveButUnclassified",
+                  "forOfficialUseOnly",
+                  "protected",
+                  "limitedDistribution"
+                ],
+                "default": "unclassified"
+              },
+              "classificationSystem": {
+                "type": "string"
+              },
+              "handlingDescription": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_spatialCoverage": {
+            "type": "object",
+            "properties": {
+              "numberOfDimensions": {
+                "type": "integer"
+              },
+              "transformationParameters": {
+                "type": "boolean"
+              },
+              "checkPointAvailability": {
+                "type": "boolean"
+              },
+              "cornerPoints": {
+                "type": "object",
+                "properties": {
+                  "upperLeft": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "upperRight": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "lowerLeft": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "lowerRight": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "format": "float"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  }
+                }
+              },
+              "pointInPixel": {
+                "type": "string",
+                "enum": [
+                  "centre",
+                  "lowerLeft",
+                  "lowerRight",
+                  "upperRight",
+                  "upperLeft"
+                ]
+              }
+            }
+          },
+          "MD_abstract": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_credit": {
+            "type": "object",
+            "properties": {
+              "authorList": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_date": {
+            "type": "object",
+            "properties": {
+              "metadataDate": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "MD_dataQuality": {
+            "type": "object",
+            "properties": {
+              "typeOfData": {
+                "type": "string",
+                "enum": [
+                  "attribute",
+                  "attributeType",
+                  "collectionHardware",
+                  "collectionSession",
+                  "dataset",
+                  "series",
+                  "nonGeographicDataset",
+                  "dimensionGroup",
+                  "feature",
+                  "featureType",
+                  "propertyType",
+                  "fieldSession",
+                  "software",
+                  "service",
+                  "model",
+                  "title",
+                  "metadata",
+                  "initiative",
+                  "sample",
+                  "document",
+                  "repository",
+                  "aggregate",
+                  "product",
+                  "collection",
+                  "coverage",
+                  "application"
+                ]
+              },
+              "descriptiveResult": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_identificationInfo": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "altTitle": {
+                "type": "string"
+              },
+              "datasetDate": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "collectionDate": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "acquisitionTitle": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_keywords": {
+            "type": "object",
+            "properties": {
+              "seanames": {
+                "type": "string"
+              },
+              "otherKeywords": {
+                "type": "string"
+              },
+              "thesaurusName": {
+                "type": "string"
+              },
+              "thesaurusURL": {
+                "type": "string"
+              },
+              "thesaurusURLName": {
+                "type": "string"
+              },
+              "thesaurusDescription": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_legalConstraints": {
+            "type": "object",
+            "properties": {
+              "accessConstraints": {
+                "type": "string",
+                "enum": [
+                  "copyright",
+                  "patent",
+                  "patentPending",
+                  "trademark",
+                  "licence",
+                  "intellectualPropertyRights",
+                  "restricted",
+                  "otherRestrictions",
+                  "unrestricted",
+                  "licenceUnrestricted",
+                  "licenceEndUser",
+                  "licenceDistributor",
+                  "private",
+                  "statutory",
+                  "confidential",
+                  "sensitiveButUnclassified",
+                  "in-confidence"
+                ]
+              },
+              "useConstraints": {
+                "type": "string",
+                "enum": [
+                  "copyright",
+                  "patent",
+                  "patentPending",
+                  "trademark",
+                  "licence",
+                  "intellectualPropertyRights",
+                  "restricted",
+                  "otherRestrictions",
+                  "unrestricted",
+                  "licenceUnrestricted",
+                  "licenceEndUser",
+                  "licenceDistributor",
+                  "private",
+                  "statutory",
+                  "confidential",
+                  "sensitiveButUnclassified",
+                  "in-confidence"
+                ]
+              },
+              "otherConstraints": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_lineage": {
+            "type": "object",
+            "properties": {
+              "processStep": {
+                "type": "string"
+              },
+              "productOutput": {
+                "type": "string"
+              },
+              "sourceMetadata": {
+                "type": "string"
+              },
+              "sourceMetadataUUID": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_purpose": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              }
+            }
+          },
+          "MD_status": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "completed",
+                  "historicalArchive",
+                  "obsolete",
+                  "onGoing",
+                  "planned",
+                  "required",
+                  "underDevelopment",
+                  "final",
+                  "pending",
+                  "retired",
+                  "superseded",
+                  "tentative",
+                  "valid",
+                  "accepted",
+                  "notAccepted",
+                  "withdrawn",
+                  "proposed",
+                  "deprecated"
+                ]
+              }
+            }
+          },
+          "collectionEventId": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number",
+            "format": "float",
+            "minimum": -90,
+            "maximum": 90
+          },
+          "lon": {
+            "type": "number",
+            "format": "float",
+            "minimum": -180,
+            "maximum": 180
+          }
+        }
+      },
+      "Frame": {
+        "type": "object",
+        "properties": {
+          "frameNumber": {
+            "type": "integer"
+          },
+          "numberObj": {
+            "type": "integer"
+          },
+          "bbox": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "Annotations": {
+        "type": "object",
+        "required": [
+          "dataId"
+        ],
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "imgWidth": {
+                "type": "integer"
+              },
+              "imgHeight": {
+                "type": "integer"
+              },
+              "label": {
+                "type": "string"
+              },
+              "algorithm": {
+                "type": "string"
+              },
+              "numberOfFrames": {
+                "type": "integer"
+              },
+              "created": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "schema": {
+                "type": "number",
+                "format": "float"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "frames": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Frame"
+            }
+          },
+          "dataId": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
